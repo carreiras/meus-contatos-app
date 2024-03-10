@@ -32,12 +32,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import carreiras.com.github.meus_contatos.database.repository.ContatoRepository
+import carreiras.com.github.meus_contatos.model.Contato
 import carreiras.com.github.meus_contatos.ui.theme.MeuscontatosappTheme
 
 class MainActivity : ComponentActivity() {
@@ -99,6 +102,9 @@ fun ContatoForm(
     onTelefoneChange: (String) -> Unit,
     onAmigoChange: (Boolean) -> Unit
 ) {
+    // obter instância do repositório
+    val context = LocalContext.current
+    val contatoRepository = ContatoRepository(context)
     Column(
         modifier = Modifier.padding(16.dp)
     ) {
@@ -147,7 +153,14 @@ fun ContatoForm(
         }
         Spacer(modifier = Modifier.height(16.dp))
         Button(
-            onClick = { /*TODO*/ },
+            onClick = {
+                val contato = Contato(
+                    nome = nome,
+                    telefone = telefone,
+                    amigo = amigo
+                )
+                contatoRepository.salvar(contato = contato)
+            },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(

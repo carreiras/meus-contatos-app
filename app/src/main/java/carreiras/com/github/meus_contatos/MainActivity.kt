@@ -99,7 +99,7 @@ fun ContatosScreen() {
                 listaContatosState.value = contatoRepository.listarContatos()
             }
         )
-        ContatoList(listaContatosState.value){
+        ContatoList(listaContatosState.value) {
             listaContatosState.value = contatoRepository.listarContatos()
         }
     }

@@ -1,5 +1,6 @@
 package carreiras.com.github.meus_contatos
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -36,7 +37,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import carreiras.com.github.meus_contatos.database.repository.ContatoRepository
@@ -99,7 +99,9 @@ fun ContatosScreen() {
                 listaContatosState.value = contatoRepository.listarContatos()
             }
         )
-        ContatoList(listaContatosState.value)
+        ContatoList(listaContatosState.value){
+            listaContatosState.value = contatoRepository.listarContatos()
+        }
     }
 }
 
@@ -185,7 +187,10 @@ fun ContatoForm(
 }
 
 @Composable
-fun ContatoList(contatos: List<Contato>) {
+fun ContatoList(
+    contatos: List<Contato>,
+    atualizar: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -193,14 +198,18 @@ fun ContatoList(contatos: List<Contato>) {
             .verticalScroll(rememberScrollState())
     ) {
         for (contato in contatos) {
-            ContatoCard(contato)
+            ContatoCard(contato, context = LocalContext.current, atualizar)
             Spacer(modifier = Modifier.height(4.dp))
         }
     }
 }
 
 @Composable
-fun ContatoCard(contato: Contato) {
+fun ContatoCard(
+    contato: Contato,
+    context: Context,
+    atualizar: () -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -231,7 +240,11 @@ fun ContatoCard(contato: Contato) {
                     fontWeight = FontWeight.Bold
                 )
             }
-            IconButton(onClick = { /*TODO*/ }) {
+            IconButton(onClick = {
+                val contatoRepository = ContatoRepository(context)
+                contatoRepository.excluir(contato)
+                atualizar()
+            }) {
                 Icon(
                     imageVector = Icons.Default.Delete,
                     contentDescription = ""

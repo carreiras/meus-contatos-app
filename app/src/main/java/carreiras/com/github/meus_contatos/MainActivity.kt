@@ -64,6 +64,9 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun ContatosScreen() {
+    val context = LocalContext.current
+    val contatoRepository = ContatoRepository(context)
+
     var nomeState = remember {
         mutableStateOf("")
     }
@@ -73,6 +76,11 @@ fun ContatosScreen() {
     var amigoState = remember {
         mutableStateOf(false)
     }
+
+    var listaContatosState = remember {
+        mutableStateOf(contatoRepository.listarContatos())
+    }
+
     Column {
         ContatoForm(
             nome = nomeState.value,
@@ -86,9 +94,12 @@ fun ContatosScreen() {
             },
             onAmigoChange = {
                 amigoState.value = it
+            },
+            atualizar = {
+                listaContatosState.value = contatoRepository.listarContatos()
             }
         )
-        ContatoList()
+        ContatoList(listaContatosState.value)
     }
 }
 
@@ -100,7 +111,8 @@ fun ContatoForm(
     amigo: Boolean,
     onNomeChange: (String) -> Unit,
     onTelefoneChange: (String) -> Unit,
-    onAmigoChange: (Boolean) -> Unit
+    onAmigoChange: (Boolean) -> Unit,
+    atualizar: () -> Unit
 ) {
     // obter instância do repositório
     val context = LocalContext.current
@@ -160,6 +172,7 @@ fun ContatoForm(
                     amigo = amigo
                 )
                 contatoRepository.salvar(contato = contato)
+                atualizar()
             },
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -172,22 +185,22 @@ fun ContatoForm(
 }
 
 @Composable
-fun ContatoList() {
+fun ContatoList(contatos: List<Contato>) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        for (i in 0..10) {
-            ContatoCard()
+        for (contato in contatos) {
+            ContatoCard(contato)
             Spacer(modifier = Modifier.height(4.dp))
         }
     }
 }
 
 @Composable
-fun ContatoCard() {
+fun ContatoCard(contato: Contato) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -203,17 +216,17 @@ fun ContatoCard() {
                     .weight(2f)
             ) {
                 Text(
-                    text = "Nome do Contato",
+                    text = contato.nome,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "8888-9999",
+                    text = contato.telefone,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Amigo",
+                    text = if (contato.amigo) "Amigo" else "Contato",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -225,37 +238,5 @@ fun ContatoCard() {
                 )
             }
         }
-    }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun ContatosScreenPreview() {
-    MeuscontatosappTheme {
-        ContatosScreen()
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ContatoFormPreview() {
-    MeuscontatosappTheme {
-        ContatoForm("Amigo", "123456789", true, {}, {}, {})
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ContatoListPreview() {
-    MeuscontatosappTheme {
-        ContatoList()
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ContatoCardPreview() {
-    MeuscontatosappTheme {
-        ContatoCard()
     }
 }
